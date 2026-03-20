@@ -117,6 +117,9 @@ let touchActive=false
 let touchX=0
 let touchY=0
 
+let downTime=0
+let moved=false
+
 function preload(){
 song = loadSound("song.mp3")
 }
@@ -215,20 +218,18 @@ let dy=p.y-0.5
 
 let dist=sqrt(dx*dx+dy*dy)
 
-/* limite */
 if(dist>0.5){
 let angle=atan2(dy,dx)
 p.x=0.5 + cos(angle)*0.49
 p.y=0.5 + sin(angle)*0.49
 }
 
-/* campo vibracional */
 let v=chladniCircular(p.x,p.y)
 
 p.vx += -v * dx * 0.04
 p.vy += -v * dy * 0.04
 
-/* FORÇA DO TOQUE */
+/* força do toque */
 if(touchActive){
 
 let tx = (touchX - width/2) / (plateRadius*2) + 0.5
@@ -240,12 +241,9 @@ let tdy = ty - p.y
 let d = sqrt(tdx*tdx + tdy*tdy)
 
 if(d < 0.2){
-
 let force = (0.2 - d) * 0.05
-
 p.vx += tdx * force
 p.vy += tdy * force
-
 }
 
 }
@@ -289,7 +287,7 @@ song.play()
 
 }
 
-/* eventos de toque */
+/* eventos corrigidos */
 
 document.body.addEventListener("pointerdown",(e)=>{
 
@@ -299,17 +297,30 @@ touchActive=true
 touchX=e.clientX
 touchY=e.clientY
 
-handleInteraction()
+downTime = millis()
+moved = false
 
 })
 
 document.body.addEventListener("pointermove",(e)=>{
+
 touchX=e.clientX
 touchY=e.clientY
+
+moved = true
+
 })
 
-document.body.addEventListener("pointerup",()=>{
+document.body.addEventListener("pointerup",(e)=>{
+
 touchActive=false
+
+let duration = millis() - downTime
+
+if(duration < 200 && !moved){
+handleInteraction()
+}
+
 })
 
 function windowResized(){
