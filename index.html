@@ -1,0 +1,325 @@
+<!DOCTYPE html> 
+<html>
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/addons/p5.sound.min.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400&display=swap" rel="stylesheet">
+
+<style>
+
+body{
+margin:0;
+background:black;
+overflow:hidden;
+font-family:Arial;
+}
+
+#controls{
+position:fixed;
+bottom:20px;
+right:20px;
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(10px);
+padding:12px;
+border-radius:10px;
+font-size:12px;
+color:white;
+}
+
+#controls div{
+margin-bottom:10px;
+}
+
+input[type=range]{
+-webkit-appearance:none;
+width:120px;
+height:2px;
+background:rgba(255,255,255,0.4);
+}
+
+input[type=range]::-webkit-slider-thumb{
+-webkit-appearance:none;
+width:14px;
+height:14px;
+border-radius:50%;
+background:white;
+}
+
+#intro{
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+color:white;
+font-size:20px;
+text-align:center;
+opacity:1;
+transition:opacity 0.6s ease;
+pointer-events:none;
+font-family:'Noto Naskh Arabic', serif;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="intro">
+Ative o som e toque na tela para iniciar experiencia.
+</div>
+
+<div id="controls">
+
+<div>
+Areia<br>
+<input type="range" id="density" min="20000" max="80000" value="40000">
+</div>
+
+<div>
+Movimento<br>
+<input type="range" id="motion" min="0.00002" max="0.0008" step="0.00002" value="0.0002">
+</div>
+
+</div>
+
+<script>
+
+let song
+let fft
+
+let particles=[]
+let particleCount=40000
+
+let motion=0.0002
+
+let radialMode=3
+let angularMode=6
+
+let targetRadial=3
+let targetAngular=6
+
+let started=false
+let lastChange=0
+
+let plateRadius
+
+let simAlpha=0
+let targetAlpha=0
+
+/* toque */
+let touchActive=false
+let touchX=0
+let touchY=0
+
+function preload(){
+song = loadSound("song.mp3")
+}
+
+function setup(){
+
+createCanvas(window.innerWidth,window.innerHeight)
+
+fft = new p5.FFT(0.8,256)
+
+plateRadius=min(width,height)*0.45
+
+createParticles()
+
+stroke(230,210,160)
+
+}
+
+function createParticles(){
+
+particles=[]
+
+for(let i=0;i<particleCount;i++){
+
+let angle=random(TWO_PI)
+let r=sqrt(random())*0.5
+
+particles.push({
+x:0.5 + cos(angle)*r,
+y:0.5 + sin(angle)*r,
+vx:random(-0.001,0.001),
+vy:random(-0.001,0.001)
+})
+
+}
+
+}
+
+function chladniCircular(x,y){
+
+let dx=x-0.5
+let dy=y-0.5
+
+let r=sqrt(dx*dx+dy*dy)
+let theta=atan2(dy,dx)
+
+let radial = sin(radialMode * PI * r * 4)
+let angular = cos(angularMode * theta)
+
+return radial * angular
+
+}
+
+function draw(){
+
+background(0)
+
+simAlpha = lerp(simAlpha, targetAlpha, 0.04)
+
+if(!started) return
+
+motion=parseFloat(document.getElementById("motion").value)
+
+let newCount=parseInt(document.getElementById("density").value)
+
+if(newCount!=particleCount){
+particleCount=newCount
+createParticles()
+}
+
+radialMode=lerp(radialMode,targetRadial,0.02)
+angularMode=lerp(angularMode,targetAngular,0.02)
+
+if(song.isPlaying()){
+
+fft.analyze()
+
+let bass=fft.getEnergy("bass")
+
+if(bass>170 && millis()-lastChange>2600){
+targetRadial=int(random(2,7))
+targetAngular=int(random(2,12))
+lastChange=millis()
+}
+
+}
+
+translate(width/2,height/2)
+
+stroke(230,210,160,255*simAlpha)
+
+for(let p of particles){
+
+let dx=p.x-0.5
+let dy=p.y-0.5
+
+let dist=sqrt(dx*dx+dy*dy)
+
+/* limite */
+if(dist>0.5){
+let angle=atan2(dy,dx)
+p.x=0.5 + cos(angle)*0.49
+p.y=0.5 + sin(angle)*0.49
+}
+
+/* campo vibracional */
+let v=chladniCircular(p.x,p.y)
+
+p.vx += -v * dx * 0.04
+p.vy += -v * dy * 0.04
+
+/* FORÇA DO TOQUE */
+if(touchActive){
+
+let tx = (touchX - width/2) / (plateRadius*2) + 0.5
+let ty = (touchY - height/2) / (plateRadius*2) + 0.5
+
+let tdx = tx - p.x
+let tdy = ty - p.y
+
+let d = sqrt(tdx*tdx + tdy*tdy)
+
+if(d < 0.2){
+
+let force = (0.2 - d) * 0.05
+
+p.vx += tdx * force
+p.vy += tdy * force
+
+}
+
+}
+
+p.vx *= 0.97
+p.vy *= 0.97
+
+p.x += p.vx + random(-motion,motion)
+p.y += p.vy + random(-motion,motion)
+
+point((p.x-0.5)*plateRadius*2,(p.y-0.5)*plateRadius*2)
+
+}
+
+}
+
+function handleInteraction(){
+
+userStartAudio()
+
+if(!started){
+
+started=true
+
+song.setLoop(true)
+song.play()
+fft.setInput(song)
+
+document.getElementById("intro").style.opacity=0
+
+targetAlpha=1
+
+return
+}
+
+if(song.isPlaying()){
+song.pause()
+}else{
+song.play()
+}
+
+}
+
+/* eventos de toque */
+
+document.body.addEventListener("pointerdown",(e)=>{
+
+if(e.target.closest("#controls")) return
+
+touchActive=true
+touchX=e.clientX
+touchY=e.clientY
+
+handleInteraction()
+
+})
+
+document.body.addEventListener("pointermove",(e)=>{
+touchX=e.clientX
+touchY=e.clientY
+})
+
+document.body.addEventListener("pointerup",()=>{
+touchActive=false
+})
+
+function windowResized(){
+
+resizeCanvas(window.innerWidth,window.innerHeight)
+plateRadius=min(width,height)*0.45
+
+}
+
+</script>
+
+</body>
+</html>
