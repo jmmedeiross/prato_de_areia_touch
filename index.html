@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>  
 <html>
 <head>
 
@@ -23,31 +23,41 @@ font-family:Arial;
 
 #controls{
 position:fixed;
-bottom:15px;
-right:15px;
+bottom:25px;
+right:25px;
 background:rgba(255,255,255,0.05);
 backdrop-filter:blur(10px);
-padding:10px;
-border-radius:10px;
-font-size:8px;
+padding:8px;
+border-radius:8px;
+font-size:7px;
 color:white;
+
+/* comportamento */
+opacity:0.25;
+transform:translateX(40px);
+transition:opacity 0.3s ease, transform 0.3s ease;
+}
+
+#controls.active{
+opacity:1;
+transform:translateX(0);
 }
 
 #controls div{
-margin-bottom:10px;
+margin-bottom:8px;
 }
 
 input[type=range]{
 -webkit-appearance:none;
-width:120px;
+width:100px;
 height:2px;
 background:rgba(255,255,255,0.4);
 }
 
 input[type=range]::-webkit-slider-thumb{
 -webkit-appearance:none;
-width:14px;
-height:14px;
+width:12px;
+height:12px;
 border-radius:50%;
 background:white;
 }
@@ -57,24 +67,25 @@ background:white;
 @media (max-width: 600px){
 
 #controls{
-bottom:14px;
-right:14px;
-padding:8px;
-border-radius:8px;
-font-size:10px;
+bottom:22px;
+right:22px;
+padding:6px;
+border-radius:7px;
+font-size:9px;
+transform:translateX(35px);
 }
 
 #controls div{
-margin-bottom:6px;
+margin-bottom:5px;
 }
 
 input[type=range]{
-width:90px;
+width:75px;
 }
 
 input[type=range]::-webkit-slider-thumb{
-width:12px;
-height:12px;
+width:10px;
+height:10px;
 }
 
 }
@@ -151,6 +162,20 @@ let touchY=0
 let downTime=0
 let moved=false
 
+/* UI auto-hide */
+let controls = document.getElementById("controls")
+let hideTimeout
+
+function showControls(){
+controls.classList.add("active")
+
+clearTimeout(hideTimeout)
+
+hideTimeout = setTimeout(()=>{
+controls.classList.remove("active")
+},2000)
+}
+
 function preload(){
 song = loadSound("song.mp3")
 }
@@ -166,6 +191,9 @@ plateRadius=min(width,height)*0.45
 createParticles()
 
 stroke(230,210,160)
+
+/* ativar ao iniciar */
+showControls()
 
 }
 
@@ -260,8 +288,6 @@ let v=chladniCircular(p.x,p.y)
 p.vx += -v * dx * 0.04
 p.vy += -v * dy * 0.04
 
-/* toque orgânico */
-
 if(touchActive){
 
 let tx = (touchX - width/2) / (plateRadius*2) + 0.5
@@ -328,7 +354,11 @@ song.play()
 
 }
 
+/* interação geral */
+
 document.body.addEventListener("pointerdown",(e)=>{
+
+showControls()
 
 if(e.target.closest("#controls")) return
 
@@ -343,12 +373,17 @@ moved = false
 
 document.body.addEventListener("pointermove",(e)=>{
 
+showControls()
+
 touchX=e.clientX
 touchY=e.clientY
 
 moved = true
 
 })
+
+document.getElementById("controls").addEventListener("pointerdown",showControls)
+document.getElementById("controls").addEventListener("pointermove",showControls)
 
 document.body.addEventListener("pointerup",(e)=>{
 
