@@ -229,7 +229,8 @@ let v=chladniCircular(p.x,p.y)
 p.vx += -v * dx * 0.04
 p.vy += -v * dy * 0.04
 
-/* força do toque */
+/* 🔥 FORÇA ORGÂNICA DO TOQUE */
+
 if(touchActive){
 
 let tx = (touchX - width/2) / (plateRadius*2) + 0.5
@@ -240,10 +241,21 @@ let tdy = ty - p.y
 
 let d = sqrt(tdx*tdx + tdy*tdy)
 
-if(d < 0.2){
-let force = (0.2 - d) * 0.05
+let radius = 0.25
+
+if(d < radius){
+
+let falloff = exp(-d * 12)
+let force = falloff * 0.08
+
+/* atração */
 p.vx += tdx * force
 p.vy += tdy * force
+
+/* rotação (redemoinho) */
+p.vx += -tdy * force * 0.6
+p.vy +=  tdx * force * 0.6
+
 }
 
 }
@@ -287,7 +299,7 @@ song.play()
 
 }
 
-/* eventos corrigidos */
+/* eventos */
 
 document.body.addEventListener("pointerdown",(e)=>{
 
