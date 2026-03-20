@@ -19,6 +19,8 @@ overflow:hidden;
 font-family:Arial;
 }
 
+/* CONTROLES */
+
 #controls{
 position:fixed;
 bottom:20px;
@@ -50,6 +52,35 @@ border-radius:50%;
 background:white;
 }
 
+/* MOBILE */
+
+@media (max-width: 600px){
+
+#controls{
+bottom:14px;
+right:14px;
+padding:8px;
+border-radius:8px;
+font-size:10px;
+}
+
+#controls div{
+margin-bottom:6px;
+}
+
+input[type=range]{
+width:90px;
+}
+
+input[type=range]::-webkit-slider-thumb{
+width:12px;
+height:12px;
+}
+
+}
+
+/* INTRO */
+
 #intro{
 position:fixed;
 top:50%;
@@ -71,7 +102,7 @@ font-family:'Noto Naskh Arabic', serif;
 <body>
 
 <div id="intro">
-Desative o modo silencioso, aumente o som e toque na tela para iniciar experiencia.
+Desative o modo silencioso, aumento o volume e toque na tela para iniciar a experiência.
 </div>
 
 <div id="controls">
@@ -229,7 +260,7 @@ let v=chladniCircular(p.x,p.y)
 p.vx += -v * dx * 0.04
 p.vy += -v * dy * 0.04
 
-/* 🔥 FORÇA ORGÂNICA DO TOQUE */
+/* toque orgânico */
 
 if(touchActive){
 
@@ -248,11 +279,9 @@ if(d < radius){
 let falloff = exp(-d * 12)
 let force = falloff * 0.08
 
-/* atração */
 p.vx += tdx * force
 p.vy += tdy * force
 
-/* rotação (redemoinho) */
 p.vx += -tdy * force * 0.6
 p.vy +=  tdx * force * 0.6
 
@@ -298,8 +327,6 @@ song.play()
 }
 
 }
-
-/* eventos */
 
 document.body.addEventListener("pointerdown",(e)=>{
 
