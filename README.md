@@ -76,13 +76,13 @@ prato_de_areia/
 │
 ├── index.html
 └── song.mp3
-
+```
 The visual system, interaction logic and audio analysis are contained in index.html.
 
 Running
 
 Open index.html in a modern browser.
-
+ 
 For the intended experience:
 
 Disable silent mode
