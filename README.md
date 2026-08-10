@@ -67,4 +67,18 @@ For the best experience, use headphones or speakers and interact with the screen
 prato_de_areia_touch/
 │
 ├── index.html
-└── song.mp3
+└── song.mp3The entire visual system and interaction logic are contained in index.html.
+
+Concept
+
+The project is an experiment in translating sound into movement.
+
+Instead of visualizing audio through traditional waveforms or equalizers, the music affects a field of particles that behaves like sand on a vibrating plate.
+
+The result is a visual system that never repeats exactly the same movement.
+
+Status
+
+Experimental interactive piece.
+
+Author
