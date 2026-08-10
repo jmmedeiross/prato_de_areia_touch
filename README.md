@@ -69,7 +69,7 @@ prato_de_areia_touch/
 ├── index.html
 └── song.mp3The entire visual system and interaction logic are contained in index.html.
 
-Concept
+## Concept
 
 The project is an experiment in translating sound into movement.
 
@@ -77,8 +77,6 @@ Instead of visualizing audio through traditional waveforms or equalizers, the mu
 
 The result is a visual system that never repeats exactly the same movement.
 
-Status
+## Status
 
 Experimental interactive piece.
-
-Author
